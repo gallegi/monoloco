@@ -170,6 +170,8 @@ def predict(args):
             n_dropout=args.n_dropout,
             p_dropout=args.dropout)
 
+    print('Cool')
+
     # for openpifpaf predictions
     predictor = Predictor(checkpoint=args.checkpoint)
 
@@ -181,6 +183,9 @@ def predict(args):
     pifpaf_outs = {}
     start = time.time()
     timing = []
+
+    distancing_results = []
+
     for idx, (pred, _, meta) in enumerate(predictor.images(args.images, batch_size=args.batch_size)):
 
         if idx % args.batch_size != 0:  # Only for MonStereo
@@ -236,6 +241,7 @@ def predict(args):
                         dic_out, boxes, keypoints, kk, dic_gt)
                     if 'social_distance' in args.activities:
                         dic_out = net.social_distance(dic_out, args)
+                        distancing_results.append(dic_out)
                     if 'raise_hand' in args.activities:
                         dic_out = net.raising_hand(dic_out, keypoints)
 
@@ -253,6 +259,15 @@ def predict(args):
             print(f'Image {cnt}\n' + '-' * 120)
             cnt += 1
             start = time.time()
+
+    log_content = {
+        'file_path':args.images,
+        'distancing':distancing_results
+    }
+    import json
+    with open('log/distancing.json', 'w') as f:
+        json.dump(log_content, f)
+
     timing = np.array(timing)
     avg_time = int(np.mean(timing))
     std_time = int(np.std(timing))
