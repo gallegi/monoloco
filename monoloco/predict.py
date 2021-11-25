@@ -255,7 +255,10 @@ def predict(args):
                         dic_out, boxes, keypoints, kk, dic_gt)
 
             # Output
-            factory_outputs(args, pifpaf_outs, dic_out, output_path, kk=kk)
+            try:
+                factory_outputs(args, pifpaf_outs, dic_out, output_path, kk=kk)
+            except Exception as ex:
+                print(f'Image {cnt}\n' + str(ex))
             print(f'Image {cnt}\n' + '-' * 120)
             cnt += 1
             start = time.time()
